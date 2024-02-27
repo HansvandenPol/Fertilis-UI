@@ -1,7 +1,16 @@
+@font-face {
+  font-family: fertilisFont;
+  src: url(./fonts/Montserrat-Regular.ttf);
+}
+@font-face {
+  font-family: fertilisFontBold;
+  src: url(./fonts/Montserrat-SemiBold.ttf);
+}
+
 body {
   background-color: #f2f2f2;
   margin: 0px;
-  font-family: tahoma;
+  font-family: fertilisFont;
   color: #282828;
 }
 
