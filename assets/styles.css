@@ -160,3 +160,18 @@ ul {
     width: 90%;
   }
 }
+
+.month-item.active {
+  color: #282828;
+  font-weight: bold;
+}
+
+.month-item.active:hover {
+  cursor:default;
+}
+
+.month-item:hover {
+  cursor:pointer;
+  color: #282828;
+  font-weight: bold;
+}
