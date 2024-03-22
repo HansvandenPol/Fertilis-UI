@@ -7,7 +7,10 @@ const app = Vue.createApp({
             inStock: true,
             details: ['50% cotton', '30% wool', '20% polyester'],
             month: '',
-            previousElement: null
+            previousElement: null,
+            quickWeatherRainfall: '',
+            quickWeatherWindDirection: '',
+            quickWeatherAmbientMax: '',
         }
     },
     methods: {
@@ -74,6 +77,44 @@ const app = Vue.createApp({
                     this.product = "Cannot load data and no cache available!"
                 }
             });
+        },
+        fetchQuickWeatherInfo() {
+            axios
+            .get('http://localhost:8080/weather/knmi/quick')
+            .then(response => {
+                const data = response.data;
+                const statistics = data.statistics;
+
+                statistics.forEach( i => {
+                    if(i.name === "dd") {
+                        const statisticData = i.data;
+                        statisticData.forEach(j => {
+                            if(j.stationIndex == 32) {
+                                this.quickWeatherWindDirection = j.value;
+                            }
+                        });
+                    }
+                    else if(i.name === "R1H") {
+                        const statisticData = i.data;
+                        statisticData.forEach(j => {
+                            if(j.stationIndex == 32) {
+                                this.quickWeatherRainfall = j.value;
+                            }
+                        }); 
+                    }
+                    else if(i.name === "tx") {
+                        const statisticData = i.data;
+                        statisticData.forEach(j => {
+                            if(j.stationIndex == 32) {
+                                this.quickWeatherAmbientMax = j.value;
+                            }
+                        }); 
+                    }
+                });
+            }
+            ).catch(error => {
+                console.warn("Couldn't access server.");
+            });
         }
       },
     mounted () {
@@ -81,5 +122,7 @@ const app = Vue.createApp({
         this.retrieveCurrentMonth();
 
         this.showForCurrent();
+
+        this.fetchQuickWeatherInfo();
       }
 })
