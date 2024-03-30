@@ -81,35 +81,47 @@ const app = Vue.createApp({
                 }
             });
         },
-        fetchQuickWeatherInfo() {
+        fetchQuickWeatherInfo(geoPosition) {
+            var defaultStationName = "DE BILT AWS";
+            var stationIndex = 32;
+
             axios
             .get('http://localhost:8081/weather/knmi/quick')
             .then(response => {
                 const data = response.data;
                 const statistics = data.statistics;
 
+                statistics.filter((static) => static.name === "stationname").forEach((stationItem) => {
+                    console.log("huh");
+                    const statisticData = stationItem.data;
+                    statisticData.forEach(j => {
+                        if(geoPosition != null) {
+                            
+                        } else {
+                            if(j.value === defaultStationName) {
+                                console.log('debug: station name ' + j.value);
+                                stationIndex = j.stationIndex;
+                                console.log('debug: station index ' + stationIndex);
+                            }
+                        }
+                        
+                    });
+                });
+
                 statistics.forEach( i => {
                     if(i.name === "dd") {
                         const statisticData = i.data;
                         statisticData.forEach(j => {
-                            if(j.stationIndex == 32) {
+                            if(j.stationIndex == stationIndex) {
                                 var direction = j.value;
                                 this.quickWeatherWindDirection = this.calculateDirectionText(direction);
-                            }
-                        });
-                    }
-                    else if(i.name === "stationname") {
-                        const statisticData = i.data;
-                        statisticData.forEach(j => {
-                            if(j.stationIndex == 32) {
-                                console.log('debug: station name ' + j.value);
                             }
                         });
                     }
                     else if(i.name === "R1H") {
                         const statisticData = i.data;
                         statisticData.forEach(j => {
-                            if(j.stationIndex == 32) {
+                            if(j.stationIndex == stationIndex) {
                                 this.quickWeatherRainfall = Math.round(j.value * 10) / 10;
                             }
                         }); 
@@ -117,7 +129,7 @@ const app = Vue.createApp({
                     else if(i.name === "tx") {
                         const statisticData = i.data;
                         statisticData.forEach(j => {
-                            if(j.stationIndex == 32) {
+                            if(j.stationIndex == stationIndex) {
                                 this.quickWeatherAmbientMax = j.value;
                             }
                         }); 
@@ -125,7 +137,7 @@ const app = Vue.createApp({
                     else if(i.name === "Sav1H") {
                         const statisticData = i.data;
                         statisticData.forEach(j => {
-                            if(j.stationIndex == 32) {
+                            if(j.stationIndex == stationIndex) {
                                 this.quickWeatherWindSpeed = this.setWindSpeedToBeaufort(j.value);
                             }
                         }); 
@@ -133,7 +145,7 @@ const app = Vue.createApp({
                     else if(i.name === "n") {
                         const statisticData = i.data;
                         statisticData.forEach(j => {
-                            if(j.stationIndex == 32) {
+                            if(j.stationIndex == stationIndex) {
                                 this.setCloudIndicatorIcon(j.value)
                             }
                         }); 
@@ -143,6 +155,8 @@ const app = Vue.createApp({
             ).catch(error => {
                 console.warn("Couldn't access server.");
             });
+
+            this.setCloudIndicatorIcon();
         },
         calculateDirectionText(direction) {
             console.log(direction);
@@ -229,8 +243,6 @@ const app = Vue.createApp({
 
         this.showForCurrent();
 
-        this.fetchQuickWeatherInfo();
-
-        this.setCloudIndicatorIcon();
+        navigator.geolocation.getCurrentPosition((position) => {this.fetchQuickWeatherInfo(position);}, () => {this.fetchQuickWeatherInfo(null);});
       }
 })
