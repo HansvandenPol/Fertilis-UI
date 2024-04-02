@@ -86,69 +86,31 @@ const app = Vue.createApp({
             var stationIndex = 32;
 
             axios
-            .get('http://localhost:8081/weather/knmi/quick')
+            .get('http://localhost:8081/weather/knmi/quick?lat=52.50&lon=6.09')
             .then(response => {
                 const data = response.data;
                 const statistics = data.statistics;
 
-                statistics.filter((static) => static.name === "stationname").forEach((stationItem) => {
-                    console.log("huh");
-                    const statisticData = stationItem.data;
-                    statisticData.forEach(j => {
-                        if(geoPosition != null) {
-                            
-                        } else {
-                            if(j.value === defaultStationName) {
-                                console.log('debug: station name ' + j.value);
-                                stationIndex = j.stationIndex;
-                                console.log('debug: station index ' + stationIndex);
-                            }
-                        }
-                        
-                    });
-                });
-
                 statistics.forEach( i => {
                     if(i.name === "dd") {
                         const statisticData = i.data;
-                        statisticData.forEach(j => {
-                            if(j.stationIndex == stationIndex) {
-                                var direction = j.value;
-                                this.quickWeatherWindDirection = this.calculateDirectionText(direction);
-                            }
-                        });
+                        this.quickWeatherWindDirection = this.calculateDirectionText(statisticData[0].value);
                     }
                     else if(i.name === "R1H") {
                         const statisticData = i.data;
-                        statisticData.forEach(j => {
-                            if(j.stationIndex == stationIndex) {
-                                this.quickWeatherRainfall = Math.round(j.value * 10) / 10;
-                            }
-                        }); 
+                        this.quickWeatherRainfall = Math.round(statisticData[0].value * 10) / 10;
                     }
                     else if(i.name === "tx") {
                         const statisticData = i.data;
-                        statisticData.forEach(j => {
-                            if(j.stationIndex == stationIndex) {
-                                this.quickWeatherAmbientMax = j.value;
-                            }
-                        }); 
+                        this.quickWeatherAmbientMax = statisticData[0].value;
                     }
                     else if(i.name === "Sav1H") {
                         const statisticData = i.data;
-                        statisticData.forEach(j => {
-                            if(j.stationIndex == stationIndex) {
-                                this.quickWeatherWindSpeed = this.setWindSpeedToBeaufort(j.value);
-                            }
-                        }); 
+                        this.quickWeatherWindSpeed = this.setWindSpeedToBeaufort(statisticData[0].value);
                     }
                     else if(i.name === "n") {
                         const statisticData = i.data;
-                        statisticData.forEach(j => {
-                            if(j.stationIndex == stationIndex) {
-                                this.setCloudIndicatorIcon(j.value)
-                            }
-                        }); 
+                        this.setCloudIndicatorIcon(statisticData[0].value);
                     }
                 });
             }
@@ -243,6 +205,7 @@ const app = Vue.createApp({
 
         this.showForCurrent();
 
-        navigator.geolocation.getCurrentPosition((position) => {this.fetchQuickWeatherInfo(position);}, () => {this.fetchQuickWeatherInfo(null);});
-      }
-})
+        // navigator.geolocation.getCurrentPosition((position) => {this.fetchQuickWeatherInfo(position);}, () => {this.fetchQuickWeatherInfo(null);});
+        this.fetchQuickWeatherInfo(null);
+    } 
+});
